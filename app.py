@@ -64,11 +64,29 @@ col1, col2, col3 = st.columns(3)
 total_casos = datos_filtrados['total_homicidios'].sum()
 municipio_max = datos_filtrados.loc[datos_filtrados['total_homicidios'].idxmax()] if not datos_filtrados.empty else None
 
+# Calcular variacion porcentual respecto al año inmediatamente anterior
+ano_anterior = ano_seleccionado - 1
+datos_ano_anterior = mapa_homicidios[mapa_homicidios['ano'] == ano_anterior]
+if municipio_buscar:
+    datos_ano_anterior = datos_ano_anterior[datos_ano_anterior['nombre_municipio'].isin(municipio_buscar)]
+total_anterior = int(datos_ano_anterior['total_homicidios'].sum()) if not datos_ano_anterior.empty else 0
+
+if total_anterior > 0:
+    variacion_pct = ((total_casos - total_anterior) / total_anterior) * 100
+    delta_texto = f"{variacion_pct:+.1f}% vs {ano_anterior}"
+else:
+    delta_texto = "Sin datos del año anterior"
+
 with col1:
-    st.metric(label="❌ Total Homicidios Nacional o Municipio seleccionado", value=f"{total_casos:,}")
+    st.metric(
+        label="❌ Total de Homicidios",
+        value=f"{total_casos:,}",
+        delta=delta_texto,
+        delta_color="inverse"
+    )
 with col2:
     val_muni = str(municipio_max['nombre_municipio']) if municipio_max is not None else "N/A"
-    st.metric(label="📍 Municipio de Mayor Impacto en Homicidios", value=val_muni)
+    st.metric(label="📍 Municipio con Más Casos", value=val_muni)
 with col3:
     val_casos = f"{municipio_max['total_homicidios']:,}" if municipio_max is not None else "0"
     st.metric(label="🚨 Máximo de casos", value=val_casos)
