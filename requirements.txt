@@ -1,0 +1,7 @@
+pandas
+geopandas
+pyogrio
+requests
+plotly
+streamlit
+python-dotenv
